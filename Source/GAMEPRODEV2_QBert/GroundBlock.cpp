@@ -14,10 +14,13 @@ AGroundBlock::AGroundBlock()
 	RootComponent = m_BlockRoot;
 
 	m_BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlockMesh"));
-	m_BlockMesh->AttachToComponent(m_BlockRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	m_BlockMesh->AttachToComponent(m_BlockRoot, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
-	m_BlockCollider = CreateDefaultSubobject<UShapeComponent>(TEXT("BlockBox"));
-	m_BlockCollider->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
+	m_BlockTopColor = CreateDefaultSubobject<UDecalComponent>(TEXT("BlockTopFace"));
+	m_BlockTopColor->AttachToComponent(m_BlockRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	//m_BlockCollider = CreateDefaultSubobject<UShapeComponent>(TEXT("BlockBox"));
+	//m_BlockCollider->SetWorldScale3D(FVector(1.0f, 1.0f, 1.0f));
 
 }
 

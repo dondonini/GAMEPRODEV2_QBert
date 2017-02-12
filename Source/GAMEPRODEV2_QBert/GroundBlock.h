@@ -27,6 +27,9 @@ public:
 		UStaticMeshComponent* m_BlockMesh;
 
 	UPROPERTY(EditAnywhere)
-		UShapeComponent* m_BlockCollider;
+		UDecalComponent* m_BlockTopColor;
+
+	//UPROPERTY(EditAnywhere)
+	//	UShapeComponent* m_BlockCollider;
 	
 };
