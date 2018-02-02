@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9cb866482b4f33346afd173dbe6a93eb
+timeCreated: 1517592816
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - m_wayPointPrefab: {fileID: 1493736335880144, guid: 1d771aa65b9e5074497188e4894d3282,
+      type: 2}
+  - m_wayPointsFolder: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
