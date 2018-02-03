@@ -5,12 +5,16 @@ public class Waypoint : MonoBehaviour {
 
     public List<Waypoint> neighbors;
 
-	public Waypoint previous
+    public bool occupied;
+
+    [SerializeField]
+    public Waypoint previous
     {
         get;
         set;
     }
 
+    [SerializeField]
     public float distance
     {
         get;

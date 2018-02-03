@@ -8,16 +8,24 @@ public class PathfindingTester : MonoBehaviour {
 
     private Transform m_prevDest = null;
 
+    private float timer = 0;
+
     private void Update()
     {
-        if (m_destination != null && m_destination != m_prevDest)
+        if (timer >= 1)
         {
-            Debug.Log("New destination set!");
 
-            GetComponent<PathManager>().NavigateTo(m_destination.position);
+            if (m_destination != null && m_destination != m_prevDest)
+            {
+                Debug.Log("New destination set!");
+
+                GetComponent<PathManager>().NavigateTo(m_destination.position);
+            }
+
+            //m_prevDest = m_destination;
+            timer = 0;
         }
-
-        m_prevDest = m_destination;
+        timer += Time.deltaTime;
     }
 
 }
