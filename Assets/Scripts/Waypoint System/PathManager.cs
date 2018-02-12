@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PathManager : MonoBehaviour {
 
-    public float walkSpeed = 5.0f;
+    public float walkSpeed = 1.0f;
     public float m_searchTolerance = 2.0f;
 
     private Stack<Vector3> currentPath;
@@ -17,8 +17,11 @@ public class PathManager : MonoBehaviour {
 
     private void Start()
     {
+        
         BuildNavPoints();
     }
+
+    
 
     // Build the nav point paths
     public void BuildNavPoints()
@@ -50,6 +53,8 @@ public class PathManager : MonoBehaviour {
             }
         }
     }
+
+    
 
     // Prep and start the AI path and movements
     public void NavigateTo(Vector3 destination)

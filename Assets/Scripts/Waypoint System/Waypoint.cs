@@ -5,20 +5,23 @@ public class Waypoint : MonoBehaviour {
 
     public List<Waypoint> neighbors;
 
-    public bool occupied;
+    public GameObject occupent = null;
 
-    [SerializeField]
     public Waypoint previous
     {
         get;
         set;
     }
 
-    [SerializeField]
     public float distance
     {
         get;
         set;
+    }
+
+    public bool IsOccupied()
+    {
+        return occupent != null;
     }
 
     private void OnDrawGizmosSelected()
