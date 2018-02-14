@@ -10,15 +10,15 @@ public class MapManager : MonoBehaviour {
     [Header("Variables")]
     // //////////////////
 
-    [Tooltip("Discover distance when searching for near by waypoints.")]
+    [Tooltip("Discover distance when searching for nearby waypoints.")]
     public float m_searchTolerance = 2.0f;
 
     // /////////////////////////////
     [Header("Assignable Variables")]
     // /////////////////////////////
 
-    public GameObject m_iGroundPart;
-    public GameObject m_iWaypoint;
+    public GameObject m_groundPrefab;
+    public GameObject m_waypoinPrefab;
 
     public Transform m_mapFolder;
     public Transform m_waypointsFolder;
@@ -27,8 +27,22 @@ public class MapManager : MonoBehaviour {
     // Runtime Variables
     // /////////////////
 
-    // NavPoint Map Grid in 2D List form
-    List<List<Waypoint>> m_navPointMapGrid;
+    // Reference Lists
+    private List<Waypoint> m_navPointMapGrid;
+    private List<GameObject> m_mapParts;
+
+    // Map Bounds
+    private Bounds m_mapBounds;
+
+    // Validations
+    private bool m_isMapReady = false;
+    private bool m_isNavMapReady = false;
+
+    // Loading Progress
+    private float m_progress = 0.0f;
+    private int m_taskTotal = 0;
+    private int m_taskProgress = 0;
+    private string m_currentTask;
 
 	public static MapManager Instance
     {
@@ -50,9 +64,15 @@ public class MapManager : MonoBehaviour {
     void Start()
     {
         // Initializing all variables
-        m_navPointMapGrid = new List<List<Waypoint>>();
+        m_navPointMapGrid = new List<Waypoint>();
+        m_mapParts = new List<GameObject>();
+        m_mapBounds = new Bounds();
 
-        BuildMap(5);
+        m_isMapReady = BuildMap(7);
+        if (m_isMapReady)
+        {
+            m_isNavMapReady = BuildNavPointMap();
+        }
     }
 
     // ///////////
@@ -60,14 +80,20 @@ public class MapManager : MonoBehaviour {
     // ///////////
 
     /// <summary>
-    /// Builds Q*Bert map
+    /// Builds the map
     /// </summary>
-    /// <param name="height">Height of the pyramid</param>
-    public void BuildMap(int height)
+    /// <param name="height">Height of the map</param>
+    /// <returns>success</returns>
+    public bool BuildMap(int height)
     {
+        // Progress stats
+        m_currentTask = "Building Map";
+        m_taskTotal = 0;
+        m_taskProgress = 0;
+
         float highestPos = height - 0.5f;
-        float partDiagonalLength = MathExtras.CalculateDiagonalOfSquare(m_iGroundPart.transform.localScale.x);
-        float partHeight = m_iGroundPart.transform.localScale.y;
+        float partDiagonalLength = MathExtras.CalculateDiagonalOfSquare(m_groundPrefab.transform.localScale.x);
+        float partHeight = m_groundPrefab.transform.localScale.y;
 
         for (int r = height; r > 0; r--)
         {
@@ -75,9 +101,9 @@ public class MapManager : MonoBehaviour {
             float newPosY = partHeight * r - (partHeight * 0.5f);
 
             // Calculate Z pos
-            float newPosZ = (partDiagonalLength * 0.5f) * r;
+            float newPosZ = (partDiagonalLength * 0.5f) * (height - r);
 
-            float rowLength = height - r;
+            float rowLength = partDiagonalLength * (height - r);
 
             for (int c = 0; c < (height - r); c++)
             {
@@ -85,11 +111,17 @@ public class MapManager : MonoBehaviour {
                 float newPosX = -(rowLength * 0.5f) + (partDiagonalLength * c);
 
                 // Build new part
-                GameObject newGroundPart = Instantiate(m_iGroundPart) as GameObject;
+                GameObject newGroundPart = Instantiate(m_groundPrefab) as GameObject;
                 newGroundPart.transform.position = new Vector3(newPosX, newPosY, newPosZ);
+                newGroundPart.transform.eulerAngles = new Vector3(0.0f, 45.0f, 0.0f);
                 newGroundPart.transform.SetParent(m_mapFolder);
+
+                // Add part in list for future reference
+                m_mapParts.Add(newGroundPart);
             }
         }
+
+        return true;
     }
 
     // //////////////
@@ -99,56 +131,56 @@ public class MapManager : MonoBehaviour {
     /// <summary>
     /// Builds navmap based on physical map.
     /// </summary>
-    public void BuildNavPointMap()
+    public bool BuildNavPointMap()
     {
+        // Progress stats
+        m_currentTask = "Building NavPointMap";
+        m_taskProgress = 0;
+        m_taskTotal = m_mapParts.Count;
 
-    }
 
-    private void CollectAllNavPoints()
-    {
-
-    }
-
-    /// <summary>
-    /// Builds new row in navpoint map grid
-    /// </summary>
-    /// <returns></returns>
-    private List<Waypoint> AddGridRow()
-    {
-        m_navPointMapGrid.Add(new List<Waypoint>());
-
-        return m_navPointMapGrid[m_navPointMapGrid.Count - 1];
-    }
-
-    /// <summary>
-    /// Unpacks the whole grid list into one 1D array.
-    /// </summary>
-    /// <returns></returns>
-    private Waypoint[] UnpackNavMapGrid()
-    {
-        List<Waypoint> tempPack = new List<Waypoint>();
-
-        // Gets every single waypoint in grid list
-        if (m_navPointMapGrid != null && m_navPointMapGrid[0] != null)
+        // Building NavPointMap
+        foreach (GameObject ground in m_mapParts)
         {
-            foreach(List<Waypoint> r in m_navPointMapGrid)
+            // Getting top point of the ground piece
+            Vector3 newPosition = ground.transform.position + new Vector3(0.0f, ground.transform.localScale.y * 0.5f, 0.0f);
+
+            // Creating and positioning waypoint
+            GameObject newWaypoint = Instantiate(m_waypoinPrefab) as GameObject;
+            newWaypoint.transform.position = newPosition;
+            newWaypoint.transform.SetParent(m_waypointsFolder);
+
+            // Adding waypoint to list for future reference
+            Waypoint getWaypoint = newWaypoint.GetComponent<Waypoint>();
+
+            m_navPointMapGrid.Add(getWaypoint);
+
+            m_taskProgress++;
+        }
+
+        // Progress stats
+        m_currentTask = "Connecting points";
+        m_taskProgress = 0;
+        m_taskTotal = m_navPointMapGrid.Count;
+
+        // Connecting all waypoints to each other
+        foreach (Waypoint waypoint in m_navPointMapGrid)
+        {
+            Waypoint[] neighboursFound = FindSurroundingNavPoints(waypoint);
+
+            if (neighboursFound.Length == 0)
             {
-                foreach(Waypoint w in r)
-                {
-                    tempPack.Add(w);
-                }
+                Debug.LogWarning("Waypoint at position (" + waypoint.transform.position + ") is too far from other waypoints!");
             }
+            else
+            {
+                waypoint.neighbors.AddRange(neighboursFound);
+            }
+
+            m_taskProgress++;
         }
 
-        // Returns null if grid is empty
-        if (tempPack.Count != 0)
-        {
-            return tempPack.ToArray();
-        }
-        else
-        {
-            return null;
-        }
+        return true;
     }
 
     /// <summary>
@@ -161,7 +193,7 @@ public class MapManager : MonoBehaviour {
         List<Waypoint> tempWayPoints = new List<Waypoint>();
 
         // Searching for waypoints nearby
-        foreach (Waypoint w in UnpackNavMapGrid())
+        foreach (Waypoint w in m_navPointMapGrid)
         {
             if (current != w)
             {
@@ -173,13 +205,61 @@ public class MapManager : MonoBehaviour {
             }
         }
 
-        if (tempWayPoints.Count != 0)
+        return tempWayPoints.ToArray();
+    }
+
+    // //////////////
+    // Helper Methods
+    // //////////////
+
+    public Bounds GetMapBounds()
+    {
+        Bounds newBound = new Bounds();
+
+        if (!m_isMapReady)
+            return newBound;
+
+        foreach (GameObject part in m_mapParts)
         {
-            return tempWayPoints.ToArray();
+            newBound.Encapsulate(part.transform.position);
         }
-        else
+
+        return newBound;
+    }
+
+    // Find the closest waypoint from target
+    public Waypoint FindClosestWaypoint(Vector3 target)
+    {
+        Waypoint closest = null;
+        float closestDist = Mathf.Infinity;
+        foreach (Waypoint waypoint in m_navPointMapGrid)
         {
-            return null;
+            float dist = (waypoint.transform.position - target).magnitude;
+            if (dist < closestDist)
+            {
+                closest = waypoint;
+                closestDist = dist;
+            }
         }
+        if (closest != null)
+        {
+            return closest;
+        }
+        return null;
+    }
+
+    public Waypoint[] GetAllWaypoints()
+    {
+        return m_navPointMapGrid.ToArray();
+    }
+
+    public bool IsMapReady()
+    {
+        return m_isMapReady;
+    }
+
+    public bool IsNavMapReady()
+    {
+        return m_isNavMapReady;
     }
 }

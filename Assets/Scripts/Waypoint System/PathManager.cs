@@ -15,46 +15,13 @@ public class PathManager : MonoBehaviour {
     private float moveTimeCurrent;
     private Vector3 currentGoal = Vector3.zero;
 
+    private MapManager mm;
+
     private void Start()
     {
-        
-        BuildNavPoints();
+        // Initializing variables
+        mm = MapManager.Instance;
     }
-
-    
-
-    // Build the nav point paths
-    public void BuildNavPoints()
-    {
-        List<Transform> m_waypoints = new List<Transform>();
-
-        foreach (GameObject waypoint in GameObject.FindGameObjectsWithTag("Waypoint"))
-        {
-            m_waypoints.Add(waypoint.transform);
-        }
-
-        foreach (Transform w in m_waypoints)
-        {
-            Waypoint current = w.GetComponent<Waypoint>();
-
-            // Reset the array
-            current.neighbors.Clear();
-
-            // Searching for waypoints nearby
-            foreach (Transform c in m_waypoints)
-            {
-                if (c != w)
-                {
-                    if (Vector3.Distance(w.position, c.position) < m_searchTolerance && w.position.y != c.position.y)
-                    {
-                        current.neighbors.Add(c.GetComponent<Waypoint>());
-                    }
-                }
-            }
-        }
-    }
-
-    
 
     // Prep and start the AI path and movements
     public void NavigateTo(Vector3 destination)
@@ -68,8 +35,8 @@ public class PathManager : MonoBehaviour {
             return;
 
         currentPath = new Stack<Vector3>();
-        Waypoint currentNode = FindClosestWaypoint(transform.position);
-        Waypoint endNode = FindClosestWaypoint(destination);
+        Waypoint currentNode = mm.FindClosestWaypoint(transform.position);
+        Waypoint endNode = mm.FindClosestWaypoint(destination);
         if (currentNode == null || endNode == null || currentNode == endNode)
             return;
         WaypointList openList = new WaypointList();
@@ -149,26 +116,7 @@ public class PathManager : MonoBehaviour {
         }
     }
 
-    // Find the closest waypoint from target
-    private Waypoint FindClosestWaypoint(Vector3 target)
-    {
-        GameObject closest = null;
-        float closestDist = Mathf.Infinity;
-        foreach (GameObject waypoint in GameObject.FindGameObjectsWithTag("Waypoint"))
-        {
-            float dist = (waypoint.transform.position - target).magnitude;
-            if (dist < closestDist)
-            {
-                closest = waypoint;
-                closestDist = dist;
-            }
-        }
-        if (closest != null)
-        {
-            return closest.GetComponent<Waypoint>();
-        }
-        return null;
-    }
+    
 
 }
 
