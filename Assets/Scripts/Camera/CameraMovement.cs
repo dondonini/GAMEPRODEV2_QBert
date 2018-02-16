@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class CameraMovement : MonoBehaviour {
 
@@ -57,6 +60,8 @@ public class CameraMovement : MonoBehaviour {
             Debug.LogError("LookAt Transform is not assigned! Disabling script...");
             enabled = false;
         }
+
+        m_lookAtTransform.position = Vector3.zero;
     }
 	
 	void FixedUpdate () {
@@ -99,6 +104,8 @@ public class CameraMovement : MonoBehaviour {
         m_camera.transform.LookAt(m_lookAtTransform.position);
     }
 
+#if UNITY_EDITOR
+
     private void OnDrawGizmosSelected()
     {
         if (m_debug && EditorApplication.isPlaying)
@@ -124,4 +131,6 @@ public class CameraMovement : MonoBehaviour {
             Gizmos.DrawLine(m_lookAtTransform.position, Vector3.LerpUnclamped(m_mapBounds.center, m_player.position, m_pullStrength));
         }
     }
+
+#endif
 }
