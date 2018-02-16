@@ -24,6 +24,8 @@ public class MapManager : MonoBehaviour {
     public Transform m_mapFolder;
     public Transform m_waypointsFolder;
 
+    
+
     // /////////////////
     // Runtime Variables
     // /////////////////
@@ -257,8 +259,16 @@ public class MapManager : MonoBehaviour {
 
     #endregion
 
+    // ///////////////////////
+#region Map Spawning Animation
+    // ///////////////////////
+
+
+
+#endregion
+
     // ///////////////
-#region Helper Methods
+    #region Helper Methods
     // ///////////////
 
     public Bounds GetMapBounds()
@@ -299,6 +309,11 @@ public class MapManager : MonoBehaviour {
     public Waypoint[] GetAllWaypoints()
     {
         return m_navPointMapGrid.ToArray();
+    }
+
+    public GameObject[] GetAllGroundSegments()
+    {
+        return m_mapParts.ToArray();
     }
 
     public bool IsMapReady()
