@@ -15,7 +15,7 @@ public class PointAndPosition : MonoBehaviour {
             if (Physics.Raycast(ray, out hit)) 
                 if (hit.transform.CompareTag("Ground"))
                 {
-                    target.transform.position = hit.transform.position + new Vector3(0f, 1f, 0f);
+                    target.transform.position = hit.transform.position + new Vector3(0f, 0.5f, 0f);
                 }
         }
     }

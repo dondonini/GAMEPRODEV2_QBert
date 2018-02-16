@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MapManager : MonoBehaviour {
 
@@ -18,7 +19,7 @@ public class MapManager : MonoBehaviour {
     // /////////////////////////////
 
     public GameObject m_groundPrefab;
-    public GameObject m_waypoinPrefab;
+    public GameObject m_waypointPrefab;
 
     public Transform m_mapFolder;
     public Transform m_waypointsFolder;
@@ -38,13 +39,14 @@ public class MapManager : MonoBehaviour {
     private bool m_isMapReady = false;
     private bool m_isNavMapReady = false;
 
-    // Loading Progress
+    // Loading Progress Info
     private float m_progress = 0.0f;
     private int m_taskTotal = 0;
     private int m_taskProgress = 0;
     private string m_currentTask;
 
-	public static MapManager Instance
+#region Singleton
+    public static MapManager Instance
     {
         get
         {
@@ -61,6 +63,8 @@ public class MapManager : MonoBehaviour {
         m_instance = this;
     }
 
+#endregion
+
     void Start()
     {
         // Initializing all variables
@@ -68,16 +72,21 @@ public class MapManager : MonoBehaviour {
         m_mapParts = new List<GameObject>();
         m_mapBounds = new Bounds();
 
-        m_isMapReady = BuildMap(7);
+        if (m_mapFolder.childCount > 0)
+            m_isMapReady = BuildMap(m_mapFolder);
+        else
+            m_isMapReady = BuildMap(7);
+
+
         if (m_isMapReady)
         {
             m_isNavMapReady = BuildNavPointMap();
         }
     }
 
-    // ///////////
-    // Map Builder
-    // ///////////
+    // ////////////
+#region Map Builder
+    // ////////////
 
     /// <summary>
     /// Builds the map
@@ -91,14 +100,13 @@ public class MapManager : MonoBehaviour {
         m_taskTotal = 0;
         m_taskProgress = 0;
 
-        float highestPos = height - 0.5f;
         float partDiagonalLength = MathExtras.CalculateDiagonalOfSquare(m_groundPrefab.transform.localScale.x);
         float partHeight = m_groundPrefab.transform.localScale.y;
 
-        for (int r = height; r > 0; r--)
+        for (int r = height; r >= 0; r--)
         {
             // Calculate Y pos
-            float newPosY = partHeight * r - (partHeight * 0.5f);
+            float newPosY = partHeight * r + (partHeight * 0.5f);
 
             // Calculate Z pos
             float newPosZ = (partDiagonalLength * 0.5f) * (height - r);
@@ -108,6 +116,7 @@ public class MapManager : MonoBehaviour {
             for (int c = 0; c < (height - r); c++)
             {
                 // Calculate X pos
+                // TODO: It's still off centered!
                 float newPosX = -(rowLength * 0.5f) + (partDiagonalLength * c);
 
                 // Build new part
@@ -124,9 +133,47 @@ public class MapManager : MonoBehaviour {
         return true;
     }
 
-    // //////////////
-    // NavMap Builder
-    // //////////////
+    /// <summary>
+    /// Collects segments of existing map
+    /// </summary>
+    /// <param name="map"></param>
+    /// <returns></returns>
+    public bool BuildMap(Transform map)
+    {
+        // Progress stats
+        m_currentTask = "Building Map";
+        m_taskTotal = 0;
+        m_taskProgress = 0;
+
+        // Breaks if map is empty
+        if (map.childCount <= 0)
+        {
+            Debug.LogWarning("Map is empty! Build not successful.");
+            return false;
+        }
+
+        // Progress stats
+        m_currentTask = "Collecting Map Segments";
+        m_taskTotal = map.childCount;
+
+        // Collecting parts
+        foreach (Transform segment in map)
+        {
+            if (segment.CompareTag("Ground"))
+            {
+                m_mapParts.Add(segment.gameObject);
+            }
+            m_taskProgress++;
+        }
+
+        return true;
+    }
+
+    #endregion
+
+    // ///////////////
+#region NavMap Builder
+    // ///////////////
 
     /// <summary>
     /// Builds navmap based on physical map.
@@ -146,7 +193,7 @@ public class MapManager : MonoBehaviour {
             Vector3 newPosition = ground.transform.position + new Vector3(0.0f, ground.transform.localScale.y * 0.5f, 0.0f);
 
             // Creating and positioning waypoint
-            GameObject newWaypoint = Instantiate(m_waypoinPrefab) as GameObject;
+            GameObject newWaypoint = Instantiate(m_waypointPrefab) as GameObject;
             newWaypoint.transform.position = newPosition;
             newWaypoint.transform.SetParent(m_waypointsFolder);
 
@@ -174,7 +221,7 @@ public class MapManager : MonoBehaviour {
             }
             else
             {
-                waypoint.neighbors.AddRange(neighboursFound);
+                waypoint.m_neighbors.AddRange(neighboursFound);
             }
 
             m_taskProgress++;
@@ -208,9 +255,11 @@ public class MapManager : MonoBehaviour {
         return tempWayPoints.ToArray();
     }
 
-    // //////////////
-    // Helper Methods
-    // //////////////
+    #endregion
+
+    // ///////////////
+#region Helper Methods
+    // ///////////////
 
     public Bounds GetMapBounds()
     {
@@ -232,20 +281,19 @@ public class MapManager : MonoBehaviour {
     {
         Waypoint closest = null;
         float closestDist = Mathf.Infinity;
+
         foreach (Waypoint waypoint in m_navPointMapGrid)
         {
             float dist = (waypoint.transform.position - target).magnitude;
+
             if (dist < closestDist)
             {
                 closest = waypoint;
                 closestDist = dist;
             }
         }
-        if (closest != null)
-        {
-            return closest;
-        }
-        return null;
+
+        return closest;
     }
 
     public Waypoint[] GetAllWaypoints()
@@ -262,4 +310,6 @@ public class MapManager : MonoBehaviour {
     {
         return m_isNavMapReady;
     }
+
+#endregion
 }

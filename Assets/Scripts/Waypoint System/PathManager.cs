@@ -6,111 +6,121 @@ using UnityEngine;
 
 public class PathManager : MonoBehaviour {
 
-    public float walkSpeed = 1.0f;
+    public float m_walkSpeed = 1.0f;
     public float m_searchTolerance = 2.0f;
 
-    private Stack<Vector3> currentPath;
-    private Vector3 currentWaypointPosition;
-    private float moveTimeTotal;
-    private float moveTimeCurrent;
-    private Vector3 currentGoal = Vector3.zero;
+    private Stack<Waypoint> m_currentPath;
+    private Vector3 m_currentWaypointPosition;
+    private float m_moveTimeTotal;
+    private float m_moveTimeCurrent;
+    private Vector3 m_currentGoal = Vector3.zero;
+    private Waypoint m_waypoint;
 
-    private MapManager mm;
+    private MapManager m_mapManager;
 
     private void Start()
     {
         // Initializing variables
-        mm = MapManager.Instance;
+        m_mapManager = MapManager.Instance;
     }
 
     // Prep and start the AI path and movements
     public void NavigateTo(Vector3 destination)
     {
-        
-        if (currentGoal != destination && currentPath != null)
-        {
+        if (m_currentGoal != destination && m_currentPath != null)
             Stop();
-        }
-        else if (currentGoal == destination)
+
+        else if (m_currentGoal == destination)
             return;
 
-        currentPath = new Stack<Vector3>();
-        Waypoint currentNode = mm.FindClosestWaypoint(transform.position);
-        Waypoint endNode = mm.FindClosestWaypoint(destination);
+        m_currentPath = new Stack<Waypoint>();
+        Waypoint currentNode = m_mapManager.FindClosestWaypoint(transform.position);
+        Waypoint endNode = m_mapManager.FindClosestWaypoint(destination);
+
         if (currentNode == null || endNode == null || currentNode == endNode)
             return;
+
         WaypointList openList = new WaypointList();
         List<Waypoint> closedList = new List<Waypoint>();
+
         openList.Add(0, currentNode);
-        currentNode.previous = null;
-        currentNode.distance = 0f;
-        currentGoal = destination;
+        currentNode.Previous = null;
+        currentNode.Distance = 0f;
+        m_currentGoal = destination;
 
         while (openList.Count > 0)
         {
             currentNode = openList.GetWaypoints()[0];
             openList.RemoveAt(0);
-            float dist = currentNode.distance;
+            float dist = currentNode.Distance;
             closedList.Add(currentNode);
+
             if (currentNode == endNode)
-            {
                 break;
-            }
-            foreach (Waypoint neighbor in currentNode.neighbors)
+
+            foreach (Waypoint neighbor in currentNode.m_neighbors)
             {
-                if (closedList.Contains(neighbor) || openList.ContainsWaypoint(neighbor))
+                if (closedList.Contains(neighbor) || openList.ContainsWaypoint(neighbor) || neighbor.IsOccupied() || neighbor.m_playerWaypointOnly)
                     continue;
-                Debug.Log(currentNode);
-                neighbor.previous = currentNode;
-                neighbor.distance = dist + (neighbor.transform.position - currentNode.transform.position).magnitude;
+
+                neighbor.Previous = currentNode;
+                neighbor.Distance = dist + (neighbor.transform.position - currentNode.transform.position).magnitude;
+
                 float distanceToTarget = (neighbor.transform.position - endNode.transform.position).magnitude;
-                openList.Add(neighbor.distance + distanceToTarget, neighbor);
+                openList.Add(neighbor.Distance + distanceToTarget, neighbor);
             }
         }
 
         if (currentNode == endNode)
         {
-            while (currentNode.previous != null)
+            while (currentNode.Previous != null)
             {
-                currentPath.Push(currentNode.transform.position);
-                currentNode = currentNode.previous;
+                m_currentPath.Push(currentNode);
+                currentNode = currentNode.Previous;
             }
-            currentPath.Push(transform.position);
+
+            m_currentPath.Push(m_mapManager.FindClosestWaypoint(transform.position));
         }
     }
 
     // Stop the current path
     public void Stop()
     {
-        currentPath = null;
-        moveTimeTotal = 0;
-        moveTimeCurrent = 0;
+        m_currentPath = null;
+        m_moveTimeTotal = 0;
+        m_moveTimeCurrent = 0;
     }
 
     private void Update()
     {
-        if (currentPath != null && currentPath.Count > 0)
+        if (m_currentPath != null && m_currentPath.Count > 0)
         {
-            if (moveTimeCurrent < moveTimeTotal)
+            if (m_moveTimeCurrent < m_moveTimeTotal)
             {
-                moveTimeCurrent += Time.deltaTime;
-                if (moveTimeCurrent > moveTimeTotal)
-                    moveTimeCurrent = moveTimeTotal;
-                transform.position = currentPath.Peek();
-                //transform.position = Vector3.Lerp(currentWaypointPosition, currentPath.Peek(), moveTimeCurrent / moveTimeTotal);
+                m_moveTimeCurrent += Time.deltaTime;
+
+                if (m_moveTimeCurrent > m_moveTimeTotal)
+                    m_moveTimeCurrent = m_moveTimeTotal;
+
+                Waypoint currentWaypoint = m_currentPath.Peek();
+                transform.position = currentWaypoint.transform.position;
+                currentWaypoint.SetOccupent(gameObject);
+                //transform.position = Vector3.Lerp(m_currentWaypointPosition, currentPath.Peek(), moveTimeCurrent / moveTimeTotal);
             }
             else
             {
-                currentWaypointPosition = currentPath.Pop();
-                if (currentPath.Count == 0)
+                Waypoint newWaypoint = m_currentPath.Pop();
+                m_currentWaypointPosition = newWaypoint.transform.position;
+                newWaypoint.SetEmpty();
+                if (m_currentPath.Count == 0)
                 {
                     //transform.position = currentPath.Peek();
                     Stop();
                 }
                 else
                 {
-                    moveTimeCurrent = 0;
-                    moveTimeTotal = walkSpeed;
+                    m_moveTimeCurrent = 0;
+                    m_moveTimeTotal = m_walkSpeed;
                 }
             }
         }
