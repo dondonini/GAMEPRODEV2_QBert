@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class PathfindingTester : MonoBehaviour {
 
-    public Transform m_destination;
+    public Transform m_follow;
 
-    private Transform m_prevDest = null;
+    private Vector3 m_destination;
+
+    private Vector3 m_prevDest = Vector3.zero;
 
     private float timer = 0;
 
     private void Update()
     {
+        m_destination = m_follow.position;
+
         if (timer >= 1)
         {
 
@@ -19,10 +23,10 @@ public class PathfindingTester : MonoBehaviour {
             {
                 Debug.Log("New destination set!");
 
-                GetComponent<PathManager>().NavigateTo(m_destination.position);
+                GetComponent<PathManager>().NavigateTo(m_destination);
             }
 
-            //m_prevDest = m_destination;
+            m_prevDest = m_destination;
             timer = 0;
         }
         timer += Time.deltaTime;

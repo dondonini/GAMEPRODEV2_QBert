@@ -15,6 +15,9 @@ public class PathManager : MonoBehaviour {
     private float m_moveTimeCurrent;
     private Vector3 m_currentGoal = Vector3.zero;
     private Waypoint m_waypoint;
+    private Waypoint m_currentWaypoint;
+    private Waypoint m_prevWaypoint;
+    
 
     private MapManager m_mapManager;
 
@@ -102,23 +105,32 @@ public class PathManager : MonoBehaviour {
                 if (m_moveTimeCurrent > m_moveTimeTotal)
                     m_moveTimeCurrent = m_moveTimeTotal;
 
-                Waypoint currentWaypoint = m_currentPath.Peek();
-                transform.position = currentWaypoint.transform.position;
-                currentWaypoint.SetOccupent(gameObject);
-                //transform.position = Vector3.Lerp(m_currentWaypointPosition, currentPath.Peek(), moveTimeCurrent / moveTimeTotal);
+                //transform.position = currentWaypoint.transform.position;
+                m_currentWaypoint.SetOccupent(gameObject);
+                transform.position = Vector3.Lerp(m_currentWaypointPosition, m_currentWaypoint.transform.position, m_moveTimeCurrent / m_moveTimeTotal);
             }
             else
             {
-                Waypoint newWaypoint = m_currentPath.Pop();
-                m_currentWaypointPosition = newWaypoint.transform.position;
-                newWaypoint.SetEmpty();
+                // Saving previous waypoint
+                m_prevWaypoint = m_currentPath.Peek();
+
+                // Taking new waypoint
+                m_currentWaypoint = m_currentPath.Pop();
+
+                // Setting position goal
+                m_currentWaypointPosition = m_currentWaypoint.transform.position;
+
+                // Setting waypoint as occupied
+                m_currentWaypoint.SetOccupent(gameObject);
+
                 if (m_currentPath.Count == 0)
                 {
-                    //transform.position = currentPath.Peek();
                     Stop();
                 }
                 else
                 {
+                    m_prevWaypoint.SetEmpty();
+                    m_prevWaypoint = m_currentWaypoint;
                     m_moveTimeCurrent = 0;
                     m_moveTimeTotal = m_walkSpeed;
                 }

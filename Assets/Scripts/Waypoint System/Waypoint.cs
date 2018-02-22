@@ -43,7 +43,9 @@ public class Waypoint : MonoBehaviour {
     {
         if (m_neighbors == null)
             return;
+
         Gizmos.color = new Color(0f, 1f, 0f);
+
         foreach(Waypoint neighbor in m_neighbors)
         {
             if (neighbor != null)
