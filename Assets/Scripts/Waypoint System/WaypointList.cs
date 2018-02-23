@@ -5,7 +5,7 @@ public class WaypointList
 {
     private List<WListValue> l;
 
-    public int Count = 0;
+    private int m_count = 0;
 
     // Constructors
     public WaypointList()
@@ -18,14 +18,14 @@ public class WaypointList
     {
         l.Add(new WListValue(d, w));
         Sort();
-        Count = l.Count;
+        m_count = l.Count;
     }
 
     public void RemoveAt(int i)
     {
         l.RemoveAt(i);
         Sort();
-        Count = l.Count;
+        m_count = l.Count;
     }
 
     public void Sort()
@@ -33,7 +33,9 @@ public class WaypointList
         l.Sort((PosA, PosB) => PosA.d.CompareTo(PosB.d));
     }
 
+    // ///////
     // Helpers
+    // ///////
 
     public bool ContainsWaypoint(Waypoint w)
     {
@@ -47,7 +49,16 @@ public class WaypointList
         return false;
     }
 
+    public Waypoint Pull()
+    {
+        Waypoint topWaypoint = l[0].w;
+        RemoveAt(0);
+        return topWaypoint;
+    }
+
+    // ///////
     // Getters
+    // ///////
 
     public float[] GetDistances()
     {
@@ -71,6 +82,14 @@ public class WaypointList
         }
 
         return build.ToArray();
+    }
+
+    public int Count
+    {
+        get
+        {
+            return m_count;
+        }
     }
 
     

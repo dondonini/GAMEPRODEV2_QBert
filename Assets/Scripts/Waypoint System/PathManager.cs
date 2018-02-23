@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -30,19 +28,30 @@ public class PathManager : MonoBehaviour {
     // Prep and start the AI path and movements
     public void NavigateTo(Vector3 destination)
     {
+
         if (m_currentGoal != destination && m_currentPath != null)
             Stop();
 
         else if (m_currentGoal == destination)
             return;
 
-        m_currentPath = new Stack<Waypoint>();
+        // Find closest waypoints for currentNode and endNode
         Waypoint currentNode = m_mapManager.FindClosestWaypoint(transform.position);
         Waypoint endNode = m_mapManager.FindClosestWaypoint(destination);
 
-        if (currentNode == null || endNode == null || currentNode == endNode)
+        if (currentNode == endNode)
+        {
+            currentNode.SetOccupent(gameObject);
+            return;
+        }
+
+        m_currentPath = new Stack<Waypoint>();
+
+        if (currentNode == null || endNode == null)
             return;
 
+        // Initiallizing open and closed lists
+        // Prevents revisiting previously checked waypoints
         WaypointList openList = new WaypointList();
         List<Waypoint> closedList = new List<Waypoint>();
 
@@ -53,8 +62,8 @@ public class PathManager : MonoBehaviour {
 
         while (openList.Count > 0)
         {
-            currentNode = openList.GetWaypoints()[0];
-            openList.RemoveAt(0);
+            // Getting current node, move from open to closed list
+            currentNode = openList.Pull();
             float dist = currentNode.Distance;
             closedList.Add(currentNode);
 
@@ -63,13 +72,16 @@ public class PathManager : MonoBehaviour {
 
             foreach (Waypoint neighbor in currentNode.m_neighbors)
             {
-                if (closedList.Contains(neighbor) || openList.ContainsWaypoint(neighbor) || neighbor.IsOccupied() || neighbor.m_playerWaypointOnly)
+                if (closedList.Contains(neighbor) 
+                    || openList.ContainsWaypoint(neighbor) 
+                    || (neighbor.IsOccupied() && neighbor.GetOccupent().CompareTag("Player") && neighbor.GetOccupent() != gameObject) 
+                    || neighbor.m_playerWaypointOnly)
                     continue;
 
                 neighbor.Previous = currentNode;
-                neighbor.Distance = dist + (neighbor.transform.position - currentNode.transform.position).magnitude;
+                neighbor.Distance = dist + (neighbor.position - currentNode.position).magnitude;
 
-                float distanceToTarget = (neighbor.transform.position - endNode.transform.position).magnitude;
+                float distanceToTarget = (neighbor.position - endNode.position).magnitude;
                 openList.Add(neighbor.Distance + distanceToTarget, neighbor);
             }
         }
@@ -98,6 +110,7 @@ public class PathManager : MonoBehaviour {
     {
         if (m_currentPath != null && m_currentPath.Count > 0)
         {
+
             if (m_moveTimeCurrent < m_moveTimeTotal)
             {
                 m_moveTimeCurrent += Time.deltaTime;
@@ -105,41 +118,45 @@ public class PathManager : MonoBehaviour {
                 if (m_moveTimeCurrent > m_moveTimeTotal)
                     m_moveTimeCurrent = m_moveTimeTotal;
 
+                Waypoint currentWaypoint = m_currentPath.Peek();
+
                 //transform.position = currentWaypoint.transform.position;
-                m_currentWaypoint.SetOccupent(gameObject);
-                transform.position = Vector3.Lerp(m_currentWaypointPosition, m_currentWaypoint.transform.position, m_moveTimeCurrent / m_moveTimeTotal);
+                transform.position = Vector3.Lerp(m_currentWaypointPosition, currentWaypoint.position, m_moveTimeCurrent / m_moveTimeTotal);
             }
             else
             {
-                // Saving previous waypoint
-                m_prevWaypoint = m_currentPath.Peek();
+                m_currentPath.Peek().SetOccupent(gameObject);
 
                 // Taking new waypoint
-                m_currentWaypoint = m_currentPath.Pop();
+                Waypoint currentWaypoint = m_currentPath.Pop();
 
-                // Setting position goal
-                m_currentWaypointPosition = m_currentWaypoint.transform.position;
-
-                // Setting waypoint as occupied
-                m_currentWaypoint.SetOccupent(gameObject);
-
-                if (m_currentPath.Count == 0)
+                if (m_currentPath.Peek().IsOccupied())
                 {
+                    Vector3 goal = m_currentPath.ElementAt(0).position;
                     Stop();
+                    NavigateTo(goal);
                 }
                 else
                 {
-                    m_prevWaypoint.SetEmpty();
-                    m_prevWaypoint = m_currentWaypoint;
-                    m_moveTimeCurrent = 0;
-                    m_moveTimeTotal = m_walkSpeed;
+
+                    // Setting position goal
+                    m_currentWaypointPosition = currentWaypoint.position;
+
+                    currentWaypoint.SetEmpty();
+
+                    if (m_currentPath.Count == 0)
+                    {
+                        Stop();
+                    }
+                    else
+                    {
+                        m_moveTimeCurrent = 0;
+                        m_moveTimeTotal = m_walkSpeed;
+                    }
                 }
             }
         }
     }
-
-    
-
 }
 
 

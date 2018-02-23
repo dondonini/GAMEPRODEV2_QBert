@@ -47,7 +47,7 @@ public class MapManager : MonoBehaviour {
     private int m_taskProgress = 0;
     private string m_currentTask;
 
-#region Singleton
+    #region Singleton
     public static MapManager Instance
     {
         get
@@ -87,7 +87,7 @@ public class MapManager : MonoBehaviour {
     }
 
     // ////////////
-#region Map Builder
+    #region Map Builder
     // ////////////
 
     /// <summary>
@@ -161,7 +161,7 @@ public class MapManager : MonoBehaviour {
         // Collecting parts
         foreach (Transform segment in map)
         {
-            if (segment.CompareTag("Ground"))
+            if (segment.CompareTag("Ground") || segment.CompareTag("Teleporter"))
             {
                 m_mapParts.Add(segment.gameObject);
             }
@@ -174,7 +174,7 @@ public class MapManager : MonoBehaviour {
     #endregion
 
     // ///////////////
-#region NavMap Builder
+    #region NavMap Builder
     // ///////////////
 
     /// <summary>
@@ -201,6 +201,12 @@ public class MapManager : MonoBehaviour {
 
             // Adding waypoint to list for future reference
             Waypoint getWaypoint = newWaypoint.GetComponent<Waypoint>();
+
+            // Set waypoint to only be used for player if tag matches
+            if (newWaypoint.CompareTag("Teleporter"))
+            {
+                getWaypoint.m_playerWaypointOnly = true;
+            }
 
             m_navPointMapGrid.Add(getWaypoint);
 
@@ -260,7 +266,7 @@ public class MapManager : MonoBehaviour {
     #endregion
 
     // ///////////////////////
-#region Map Spawning Animation
+    #region Map Spawning Animation
     // ///////////////////////
 
 

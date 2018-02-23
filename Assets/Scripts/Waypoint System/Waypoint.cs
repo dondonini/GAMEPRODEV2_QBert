@@ -5,7 +5,44 @@ public class Waypoint : MonoBehaviour {
 
     public List<Waypoint> m_neighbors;
     public bool m_playerWaypointOnly = false;
+
+    [ReadOnly]
+    [SerializeField]
     private GameObject m_occupent = null;
+
+    // /////////////////
+    #region Passthroughs
+    // /////////////////
+
+    public Vector3 position
+    {
+        get
+        {
+            return transform.position;
+        }
+        set
+        {
+            transform.position = value;
+        }
+    }
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+        set
+        {
+            transform.position = value;
+        }
+    }
+
+    #endregion
+
+    // //////////////////////
+    #region Getters & Setters
+    // //////////////////////
 
     public Waypoint Previous
     {
@@ -33,6 +70,13 @@ public class Waypoint : MonoBehaviour {
     {
         m_occupent = null;
     }
+
+    public Vector3 GetTopPosition()
+    {
+        return transform.position + new Vector3(0f, transform.localScale.y * 0.5f, 0f);
+    }
+
+    #endregion
 
     public bool IsOccupied()
     {
