@@ -10,6 +10,9 @@ public class GreenBlob_SM : MonoBehaviour {
     [HideInInspector]
     public Transform m_chaseTarget = null;
 
+    [ReadOnly]
+    public Waypoint m_currentWaypoint = null;
+
     // //////
     // States
     // //////
@@ -18,13 +21,13 @@ public class GreenBlob_SM : MonoBehaviour {
     private EnemyStates_SM m_previousState;
 
     [HideInInspector]
-    // TODO: Create all states
+    public GB_ChaseState m_chaseState;
 
     
 
     private void Awake()
     {
-        
+        m_chaseState = new GB_ChaseState(this);
     }
 
     // Use this for initialization
