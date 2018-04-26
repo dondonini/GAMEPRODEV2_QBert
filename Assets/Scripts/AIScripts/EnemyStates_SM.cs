@@ -11,7 +11,7 @@ public interface EnemyStates_SM {
     void ToEnterState();
 
     // State when following player
-    void ToFollowState();
+    void ToChaseState();
 
     // State when leaving map
     void ToExitState();
