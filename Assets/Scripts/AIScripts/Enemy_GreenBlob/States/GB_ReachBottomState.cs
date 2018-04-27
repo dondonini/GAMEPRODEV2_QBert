@@ -31,6 +31,11 @@ public class GB_ReachBottomState : IEnemyStates_SM
         m_strafeLength = Random.Range(enemy.m_strafeMin, enemy.m_strafeMax);
     }
 
+    public void StartState()
+    {
+
+    }
+
     public void UpdateState()
     {
         if (!FailSafe()) return;

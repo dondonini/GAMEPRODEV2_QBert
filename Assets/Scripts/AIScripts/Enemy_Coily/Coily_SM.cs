@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class Coily_SM : MonoBehaviour {
 
+    public enum Direction
+    {
+        TL, //  ( 1,  1,  -1)
+        TR, //  (-1,  1,  -1)
+        BL, //  ( 1, -1,   1)
+        BR  //  (-1, -1,   1)
+    }
+
     [Tooltip("The speed the AI is going to chase the player in seconds.")]
     public float m_chaseFreq = 1.0f;
 
@@ -38,6 +46,8 @@ public class Coily_SM : MonoBehaviour {
 
     [ReadOnly]
     public bool m_isJumping = false;
+
+    public Direction m_direction;
 
     [HideInInspector]
     public float m_animationTime = 0.0f;
@@ -77,9 +87,9 @@ public class Coily_SM : MonoBehaviour {
 
     void Awake()
     {
-        m_enterState = new Co_EnterState(this);
-        m_chaseState = new Co_ChaseState(this);
-        m_reachBottomState = new Co_ReachBottomState(this);
+        m_enterState        = new Co_EnterState(this);
+        m_chaseState        = new Co_ChaseState(this);
+        m_reachBottomState  = new Co_ReachBottomState(this);
     }
 
     // Use this for initialization
@@ -99,12 +109,15 @@ public class Coily_SM : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        m_currentState.UpdateState();
-
         if (m_previousState != null && m_previousState != m_currentState)
         {
             Debug.Log("Coily state changed! " + m_previousState + " -> " + m_currentState);
+
+            // Initiate start
+            m_currentState.StartState();
         }
+
+        m_currentState.UpdateState();
 
         m_previousState = m_currentState;
 	}
@@ -197,5 +210,33 @@ public class Coily_SM : MonoBehaviour {
         // Updating occupation on previous and new waypoints
         m_goalWaypoint.SetOccupent(m_enemyAnchor);
         if (m_prevWaypoint) m_prevWaypoint.SetEmpty();
+
+        if (m_goalWaypoint && m_prevWaypoint)
+        {
+            // Calculating direction
+            Vector3 newDirection = m_goalWaypoint.position - m_prevWaypoint.position;
+            newDirection.Normalize();
+
+            if (newDirection.x > 0 && newDirection.y > 0 && newDirection.z < 0)
+            {
+                // Going up left
+                m_direction = Direction.TL;
+            }
+            else if (newDirection.x < 0 && newDirection.y > 0 && newDirection.z < 0)
+            {
+                // Going up right
+                m_direction = Direction.TR;
+            }
+            else if (newDirection.x > 0 && newDirection.y < 0 && newDirection.z > 0)
+            {
+                // Going down left
+                m_direction = Direction.BL;
+            }
+            else if (newDirection.x < 0 && newDirection.y < 0 && newDirection.z > 0)
+            {
+                // Going down right
+                m_direction = Direction.BR;
+            }
+        }
     }
 }

@@ -33,6 +33,7 @@ public class MapManager : MonoBehaviour {
     // Reference Lists
     private List<Waypoint> m_navPointMapGrid;
     private List<GameObject> m_mapParts;
+    private List<BlockInfo> m_mapInfo;
     private List<Waypoint> m_secondTopRow;
 
     // Map Bounds
@@ -49,6 +50,10 @@ public class MapManager : MonoBehaviour {
     private int m_taskTotal = 0;
     private int m_taskProgress = 0;
     private string m_currentTask;
+
+    // Global Scripts
+    private GameInfo m_gameInfo;
+    private GameManager m_gameManager;
 
     #region Singleton
 
@@ -71,7 +76,12 @@ public class MapManager : MonoBehaviour {
         // Initializing all variables
         m_navPointMapGrid = new List<Waypoint>();
         m_mapParts = new List<GameObject>();
+        m_mapInfo = new List<BlockInfo>();
         m_mapBounds = new Bounds();
+
+        // Collect global scripts
+        m_gameInfo = GameInfo.instance;
+        m_gameManager = GameManager.instance;
 
         if (m_mapFolder.childCount > 0)
             m_isMapReady = BuildMap(m_mapFolder);
@@ -134,6 +144,10 @@ public class MapManager : MonoBehaviour {
 
                 // Add part in list for future reference
                 m_mapParts.Add(newGroundPart);
+
+                BlockInfo newBlockInfo = newGroundPart.GetComponent<BlockInfo>();
+                if (newBlockInfo)
+                    m_mapInfo.Add(newBlockInfo);
             }
         }
 
@@ -169,6 +183,10 @@ public class MapManager : MonoBehaviour {
             if (segment.CompareTag("Ground") || segment.CompareTag("Teleporter"))
             {
                 m_mapParts.Add(segment.gameObject);
+
+                BlockInfo newBlockInfo = segment.GetComponent<BlockInfo>();
+                if (newBlockInfo)
+                    m_mapInfo.Add(newBlockInfo);
             }
             m_taskProgress++;
         }

@@ -12,8 +12,6 @@ public class Co_ReachBottomState : IEnemyStates_SM {
         Right=1
     };
 
-    private float m_bottomReachedWaitDuration = 1.0f;
-
     private int m_strafeLength = 0;
     private int m_strafeCount = 0;
 
@@ -28,6 +26,11 @@ public class Co_ReachBottomState : IEnemyStates_SM {
 
         // Get random strafing length
         m_strafeLength = Random.Range(enemy.m_strafeMin, enemy.m_strafeMax);
+    }
+
+    public void StartState()
+    {
+
     }
 
     public void UpdateState()

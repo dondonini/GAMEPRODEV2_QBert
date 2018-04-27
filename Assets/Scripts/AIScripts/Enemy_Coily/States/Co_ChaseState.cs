@@ -11,6 +11,11 @@ public class Co_ChaseState : IEnemyStates_SM {
         enemy = _statePattern;
     }
 
+    public void StartState()
+    {
+
+    }
+
     public void UpdateState()
     {
         if (!FailSafe()) return;
@@ -25,6 +30,11 @@ public class Co_ChaseState : IEnemyStates_SM {
                 enemy.m_currentWaypoint, 
                 enemy.m_chaseTarget.position)
                 );
+
+            if (enemy.m_goalWaypoint.m_playerWaypointOnly)
+            {
+                ToExitState();
+            }
 
             enemy.m_waitTime = 0.0f;
             enemy.m_animationTime = 0.0f;

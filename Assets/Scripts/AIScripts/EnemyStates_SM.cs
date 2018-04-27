@@ -3,6 +3,9 @@
     // Updates the state
     void UpdateState();
 
+    // Start method for state
+    void StartState();
+
     // State when entering map
     void ToEnterState();
 

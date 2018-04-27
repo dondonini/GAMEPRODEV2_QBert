@@ -17,6 +17,11 @@ public class GB_EnterState : IEnemyStates_SM
         enemy = _statePattern;
     }
 
+    public void StartState()
+    {
+
+    }
+
     public void UpdateState()
     {
         if (enemy.m_waitTime <= enemy.m_chaseFreq && enemy.m_goalWaypoint != null)

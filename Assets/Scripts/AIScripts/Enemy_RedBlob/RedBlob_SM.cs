@@ -5,6 +5,14 @@ using UnityEngine;
 public class RedBlob_SM : MonoBehaviour
 {
 
+    public enum Direction
+    {
+        TL, //  ( 1,  1,  -1)
+        TR, //  (-1,  1,  -1)
+        BL, //  ( 1, -1,   1)
+        BR  //  (-1, -1,   1)
+    }
+
     [Tooltip("The speed the NPC is going to head down in seconds.")]
     public float m_chaseFreq = 1.0f;
 
@@ -39,6 +47,8 @@ public class RedBlob_SM : MonoBehaviour
     [HideInInspector]
     public float m_waitTime = Mathf.Infinity;
 
+    public Direction m_direction;
+
     // //////
     // States
     // //////
@@ -50,6 +60,8 @@ public class RedBlob_SM : MonoBehaviour
     public RB_EnterState m_enterState;
     [HideInInspector]
     public RB_ReachBottomState m_reachBottomState;
+    [HideInInspector]
+    public RB_ExitState m_exitState;
 
     [HideInInspector]
     public MapManager m_mapManager;
@@ -72,6 +84,7 @@ public class RedBlob_SM : MonoBehaviour
     {
         m_enterState = new RB_EnterState(this);
         m_reachBottomState = new RB_ReachBottomState(this);
+        m_exitState = new RB_ExitState(this);
     }
 
     // Use this for initialization
@@ -87,12 +100,14 @@ public class RedBlob_SM : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         m_currentState.UpdateState();
 
         if (m_previousState != null && m_previousState != m_currentState)
         {
             Debug.Log("RedBlob state changed! " + m_previousState + " -> " + m_currentState);
+
+            // Initiate start method
+            m_currentState.StartState();
         }
 
         m_previousState = m_currentState;
@@ -186,5 +201,33 @@ public class RedBlob_SM : MonoBehaviour
         // Updating occupation on previous and new waypoints
         m_goalWaypoint.SetOccupent(m_enemyAnchor);
         if (m_prevWaypoint) m_prevWaypoint.SetEmpty();
+
+        if (m_goalWaypoint && m_prevWaypoint)
+        {
+            // Calculating direction
+            Vector3 newDirection = m_goalWaypoint.position - m_prevWaypoint.position;
+            newDirection.Normalize();
+
+            if (newDirection.x > 0 && newDirection.y > 0 && newDirection.z < 0)
+            {
+                // Going up left
+                m_direction = Direction.TL;
+            }
+            else if (newDirection.x < 0 && newDirection.y > 0 && newDirection.z < 0)
+            {
+                // Going up right
+                m_direction = Direction.TR;
+            }
+            else if (newDirection.x > 0 && newDirection.y < 0 && newDirection.z > 0)
+            {
+                // Going down left
+                m_direction = Direction.BL;
+            }
+            else if (newDirection.x < 0 && newDirection.y < 0 && newDirection.z > 0)
+            {
+                // Going down right
+                m_direction = Direction.BR;
+            }
+        }
     }
 }

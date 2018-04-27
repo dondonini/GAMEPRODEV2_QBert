@@ -31,6 +31,11 @@ public class RB_ReachBottomState : IEnemyStates_SM
         m_strafeLength = Random.Range(enemy.m_strafeMin, enemy.m_strafeMax);
     }
 
+    public void StartState()
+    {
+
+    }
+
     public void UpdateState()
     {
         if (!FailSafe()) return;
@@ -82,7 +87,7 @@ public class RB_ReachBottomState : IEnemyStates_SM
 
     public void ToExitState()
     {
-
+        enemy.m_currentState = enemy.m_exitState;
     }
 
     #endregion

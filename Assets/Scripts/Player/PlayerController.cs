@@ -38,6 +38,9 @@ public class PlayerController : MonoBehaviour {
 
     private MapManager m_mapManager;
     private GameInfo m_gameInfo;
+    private GameManager m_gameManager;
+
+    private Animator m_characterAnimator;
 
     private void OnValidate()
     {
@@ -53,10 +56,14 @@ public class PlayerController : MonoBehaviour {
 
         m_mapManager = MapManager.instance;
         m_gameInfo = GameInfo.instance;
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        m_gameManager = GameManager.instance;
+
+        m_characterAnimator = GetComponent<Animator>();
+
+    }
+
+    // Update is called once per frame
+    void Update () {
         InputManager();
 
 
@@ -72,6 +79,15 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
+        if (m_isJumping)
+        {
+            m_characterAnimator.SetBool("Jumping", true);
+        }
+        else
+        {
+            m_characterAnimator.SetBool("Jumping", false);
+        }
+
         m_waitTime += Time.deltaTime;
     }
 
@@ -79,27 +95,35 @@ public class PlayerController : MonoBehaviour {
     {
         if (m_isMoving) return;
 
+        // Up Right
         if (Input.GetKeyDown(KeyCode.W))
         {
             m_goalWaypoint = m_mapManager.FindClosestWaypoint(transform.position + new Vector3(-1, 1, -1) * 0.6f);
+            m_characterAnimator.SetInteger("Direction", 1);
             StartMovement();
         }
 
+        // Up Left
         if (Input.GetKeyDown(KeyCode.A))
         {
             m_goalWaypoint = m_mapManager.FindClosestWaypoint(transform.position + new Vector3(1, 1, -1) * 0.6f);
+            m_characterAnimator.SetInteger("Direction", 0);
             StartMovement();
         }
 
+        // Down Left
         if (Input.GetKeyDown(KeyCode.S))
         {
             m_goalWaypoint = m_mapManager.FindClosestWaypoint(transform.position + new Vector3(1, -1, 1) * 0.6f);
+            m_characterAnimator.SetInteger("Direction", 3);
             StartMovement();
         }
 
+        // Down Right
         if (Input.GetKeyDown(KeyCode.D))
         {
             m_goalWaypoint = m_mapManager.FindClosestWaypoint(transform.position + new Vector3(-1, -1, 1) * 0.6f);
+            m_characterAnimator.SetInteger("Direction", 2);
             StartMovement();
         }
     }
@@ -205,6 +229,6 @@ public class PlayerController : MonoBehaviour {
 
     void ChangeBlockColor(GameObject b)
     {
-        b.GetComponent<Renderer>().material = m_gameInfo.m_mapChangeColor;
+        m_gameManager.SetBlock(b, true);
     }
 }
