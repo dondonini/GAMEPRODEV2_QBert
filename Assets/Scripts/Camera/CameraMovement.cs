@@ -49,7 +49,7 @@ public class CameraMovement : MonoBehaviour {
 	void Start () {
 
         // Initializing Variables
-        m_mapManager = MapManager.Instance;
+        m_mapManager = MapManager.instance;
         m_camera = Camera.main;
         m_mapBounds = new Bounds();
         m_velocity = Vector3.zero;

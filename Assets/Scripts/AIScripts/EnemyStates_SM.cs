@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public interface EnemyStates_SM {
+﻿public interface IEnemyStates_SM {
 
     // Updates the state
     void UpdateState();
@@ -10,8 +6,11 @@ public interface EnemyStates_SM {
     // State when entering map
     void ToEnterState();
 
-    // State when following player
+    // State when chasing the player
     void ToChaseState();
+
+    // State to reach the bottom (Applicable to Coily only)
+    void ToReachBottomState();
 
     // State when leaving map
     void ToExitState();

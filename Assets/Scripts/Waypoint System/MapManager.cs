@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class MapManager : MonoBehaviour {
 
-    private static MapManager m_instance = null;
+    public static MapManager instance = null;
 
     // //////////////////
     [Header("Variables")]
@@ -33,9 +33,12 @@ public class MapManager : MonoBehaviour {
     // Reference Lists
     private List<Waypoint> m_navPointMapGrid;
     private List<GameObject> m_mapParts;
+    private List<Waypoint> m_secondTopRow;
 
     // Map Bounds
     private Bounds m_mapBounds;
+    private float m_topWPHeight = -Mathf.Infinity;
+    private float m_bottomWPHeight = Mathf.Infinity;
 
     // Validations
     private bool m_isMapReady = false;
@@ -48,26 +51,22 @@ public class MapManager : MonoBehaviour {
     private string m_currentTask;
 
     #region Singleton
-    public static MapManager Instance
+
+    void Awake()
     {
-        get
+        if (instance == null)
         {
-            if (m_instance == null)
-            {
-                m_instance = new MapManager();
-            }
-            return m_instance;
+            instance = this;
         }
+
+        InitMap();
     }
 	
-	void Awake()
-    {
-        m_instance = this;
-    }
+	
 
 #endregion
 
-    void Start()
+    void InitMap()
     {
         // Initializing all variables
         m_navPointMapGrid = new List<Waypoint>();
@@ -82,7 +81,13 @@ public class MapManager : MonoBehaviour {
 
         if (m_isMapReady)
         {
+            Debug.Log("MapManager: Map is ready!");
             m_isNavMapReady = BuildNavPointMap();
+        }
+
+        if (m_isNavMapReady)
+        {
+            Debug.Log("MapManager: NavMap is ready!");
         }
     }
 
@@ -210,6 +215,12 @@ public class MapManager : MonoBehaviour {
 
             m_navPointMapGrid.Add(getWaypoint);
 
+            // Check for highest point on map
+            m_topWPHeight = Mathf.Max(m_topWPHeight, newPosition.y);
+
+            // Check for lowest point on map
+            m_bottomWPHeight = Mathf.Min(m_bottomWPHeight, newPosition.y);
+
             m_taskProgress++;
         }
 
@@ -271,6 +282,29 @@ public class MapManager : MonoBehaviour {
 
 
 
+    #endregion
+
+    // ///////////////////////////
+    #region Collect Second Top Row
+    // ///////////////////////////
+
+    public List<Waypoint> GetWPSecondTopRow()
+    {
+        if (m_secondTopRow == null)
+        {
+            foreach (Waypoint w in m_navPointMapGrid)
+            {
+                if (w.position.y == m_topWPHeight)
+                {
+                    m_secondTopRow = new List<Waypoint>();
+                    m_secondTopRow.AddRange(w.m_neighbors);
+                }
+            }
+        }
+
+        return m_secondTopRow;
+    }
+
 #endregion
 
     // ///////////////
@@ -293,14 +327,14 @@ public class MapManager : MonoBehaviour {
     }
 
     // Find the closest waypoint from target
-    public Waypoint FindClosestWaypoint(Vector3 target)
+    public Waypoint FindClosestWaypoint(Vector3 t)
     {
         Waypoint closest = null;
         float closestDist = Mathf.Infinity;
 
         foreach (Waypoint waypoint in m_navPointMapGrid)
         {
-            float dist = (waypoint.transform.position - target).magnitude;
+            float dist = (waypoint.transform.position - t).magnitude;
 
             if (dist < closestDist)
             {
@@ -310,6 +344,67 @@ public class MapManager : MonoBehaviour {
         }
 
         return closest;
+    }
+
+    // Find closest waypoint towards the target
+    public Waypoint GetWaypointInDirectionOfTarget(Waypoint wp, Vector3 t)
+    {
+        float distance = Mathf.Infinity;
+        Waypoint closestWaypoint = null;
+
+        // Check all neighbors in waypoint to see which one is closest to target
+        // TODO: This code will always go for the closest waypoint. So if the enemy is in a dead end, it will never get out!
+        for (int w = 0; w < wp.m_neighbors.Count; w++)
+        {
+            Waypoint selectedWaypoint = wp.m_neighbors[w];
+
+            float distanceToTarget = Vector3.Distance(selectedWaypoint.position, t);
+
+            if (distanceToTarget < distance)
+            {
+                closestWaypoint = selectedWaypoint;
+                distance = distanceToTarget;
+            }
+        }
+
+        if (Vector3.Distance(wp.position, t) < 0.5f)
+            if (Vector3.Distance(wp.position, t) < distance)
+            {
+                closestWaypoint = wp;
+            }
+
+        return closestWaypoint;
+    }
+
+    // Find closest waypoint towards the target
+    public Waypoint GetWaypointInDirectionOfTarget(Vector3 p, Vector3 t)
+    {
+        float distance = Mathf.Infinity;
+        Waypoint closestWaypoint = null;
+        Waypoint wp = FindClosestWaypoint(p);
+
+        // Check all neighbors in waypoint to see which one is closest to target
+        // TODO: This code will always go for the closest waypoint. So if the enemy is in a dead end, it will never get out!
+        for (int w = 0; w < wp.m_neighbors.Count; w++)
+        {
+            Waypoint selectedWaypoint = wp.m_neighbors[w];
+
+            float distanceToTarget = Vector3.Distance(selectedWaypoint.position, t);
+
+            if (distanceToTarget < distance)
+            {
+                closestWaypoint = selectedWaypoint;
+                distance = distanceToTarget;
+            }
+        }
+
+        if (Vector3.Distance(wp.position, t) < 0.5f)
+            if (Vector3.Distance(wp.position, t) < distance)
+            {
+                closestWaypoint = wp;
+            }
+
+        return closestWaypoint;
     }
 
     public Waypoint[] GetAllWaypoints()
@@ -330,6 +425,24 @@ public class MapManager : MonoBehaviour {
     public bool IsNavMapReady()
     {
         return m_isNavMapReady;
+    }
+
+    public float GetLowestWPInMap()
+    {
+        return m_bottomWPHeight;
+    }
+
+    public GameObject GetMapPartFromWaypoint(Waypoint waypoint)
+    {
+        for(int i = 0; i < m_navPointMapGrid.Count; i++)
+        {
+            if (m_navPointMapGrid[i] == waypoint)
+            {
+                return m_mapParts[i];
+            }
+        }
+
+        return null;
     }
 
 #endregion

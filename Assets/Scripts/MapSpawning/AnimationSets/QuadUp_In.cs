@@ -14,7 +14,7 @@ public class QuadUp_In : BaseMapSpawn {
 
     public QuadUp_In()
     {
-        m_mapManager = MapManager.Instance;
+        m_mapManager = MapManager.instance;
         m_rows = new List<List<Transform>>();
         m_endPos = new List<Vector3>();
 

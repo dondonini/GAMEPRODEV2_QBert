@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33444639279696668}
   - component: {fileID: 65033890857786642}
   - component: {fileID: 23343627434283196}
+  - component: {fileID: 114195608672293276}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Ground
@@ -35,8 +36,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1672598250896042}
-  m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: 0.38268343, z: -0, w: 0.92387956}
+  m_LocalPosition: {x: -0.0020000935, y: 0.5, z: 2.124427}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -56,7 +57,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: c268dd64163d2ad4f85af8db5402b0a1, type: 2}
+  - {fileID: 2100000, guid: b415ffc3e0a21d14f86b18dc80ccb651, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -95,3 +96,14 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114195608672293276
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1672598250896042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e84ecffcf54fdfe44b669ddff88e8c25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
