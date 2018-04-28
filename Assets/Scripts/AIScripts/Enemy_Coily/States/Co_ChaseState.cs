@@ -13,12 +13,14 @@ public class Co_ChaseState : IEnemyStates_SM {
 
     public void StartState()
     {
-
+        
     }
 
     public void UpdateState()
     {
         if (!FailSafe()) return;
+
+        enemy.m_isBall = false;
 
         if (enemy.m_waitTime <= enemy.m_chaseFreq && enemy.m_goalWaypoint != null)
         {

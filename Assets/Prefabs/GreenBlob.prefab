@@ -37,8 +37,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4843349473103798}
   - component: {fileID: 114724952684578636}
-  - component: {fileID: 54285810509290430}
+  - component: {fileID: 95109965131706146}
   - component: {fileID: 135445086741446868}
+  - component: {fileID: 54285810509290430}
   m_Layer: 0
   m_Name: GreenBlob
   m_TagString: Enemy
@@ -66,7 +67,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1034631300793388}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 10, z: 0}
+  m_LocalPosition: {x: 0.008258902, y: 3, z: 0.86772585}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4746235865281406}
@@ -82,12 +83,29 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!95 &95109965131706146
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1034631300793388}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 55b4bee4bf37d5e4cb39a0b3a795c211, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!114 &114580810363075530
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -126,6 +144,7 @@ MonoBehaviour:
   m_animationTime: 0
   m_waitTime: Infinity
   m_direction: 0
+  m_animator: {fileID: 95109965131706146}
   m_mapManager: {fileID: 0}
 --- !u!135 &135445086741446868
 SphereCollider:

@@ -49,6 +49,8 @@ public class GreenBlob_SM : MonoBehaviour
     [ReadOnly]
     public Direction m_direction;
 
+    public Animator m_animator;
+
     // //////
     // States
     // //////
@@ -120,6 +122,8 @@ public class GreenBlob_SM : MonoBehaviour
     {
         Vector3 startPos = Vector3.zero;
         Vector3 endPos = Vector3.zero;
+
+        m_animator.SetBool("Jumping", m_isJumping);
 
         if (m_prevWaypoint)
             startPos = m_prevWaypoint.position;

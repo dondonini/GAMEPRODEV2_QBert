@@ -30,7 +30,7 @@ public class Co_ReachBottomState : IEnemyStates_SM {
 
     public void StartState()
     {
-
+        enemy.m_isBall = true;
     }
 
     public void UpdateState()

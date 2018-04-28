@@ -49,6 +49,8 @@ public class RedBlob_SM : MonoBehaviour
 
     public Direction m_direction;
 
+    public Animator m_animator;
+
     // //////
     // States
     // //////
@@ -119,6 +121,8 @@ public class RedBlob_SM : MonoBehaviour
     {
         Vector3 startPos = Vector3.zero;
         Vector3 endPos = m_goalWaypoint.position;
+
+        m_animator.SetBool("Jumping", m_isJumping);
 
         if (m_prevWaypoint)
             startPos = m_prevWaypoint.position;

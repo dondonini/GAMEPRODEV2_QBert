@@ -1,13 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CubeColorChange : MonoBehaviour {
+
+    Mesh mesh;
+
+    private void OnValidate()
+    {
+        Initialize();
+        MapTextureToCube();
+    }
 
     // Use this for initialization
     void Start()
     {
-        Mesh mesh = GetComponent<MeshFilter>().mesh;
+        Initialize();
+        MapTextureToCube();
+    }
+
+    void Initialize()
+    {
+        mesh = GetComponent<MeshFilter>().sharedMesh;
+    }
+
+    void MapTextureToCube()
+    {
         Vector2[] UVs = new Vector2[mesh.vertices.Length];
         // Front
         UVs[0] = new Vector2(0.0f, 0.0f);
@@ -41,9 +57,4 @@ public class CubeColorChange : MonoBehaviour {
         UVs[23] = new Vector2(1.0f, 0.334f);
         mesh.uv = UVs;
     }
-
-    // Update is called once per frame
-    void Update () {
-		
-	}
 }

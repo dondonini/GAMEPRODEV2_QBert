@@ -24,6 +24,7 @@ public class Coily_SM : MonoBehaviour {
 
     public GameObject m_enemyAnchor;
     public SpriteRenderer m_enemyVisual;
+    public Animator m_animator;
 
     [Space]
 
@@ -47,7 +48,7 @@ public class Coily_SM : MonoBehaviour {
     [ReadOnly]
     public bool m_isJumping = false;
 
-    public Direction m_direction;
+    public Direction m_direction = Direction.BL;
 
     [HideInInspector]
     public float m_animationTime = 0.0f;
@@ -128,6 +129,9 @@ public class Coily_SM : MonoBehaviour {
     {
         Vector3 startPos = Vector3.zero;
         Vector3 endPos = m_goalWaypoint.position;
+
+        m_animator.SetBool("isBall", m_isBall);
+        m_animator.SetBool("Jumping", m_isJumping);
 
         if (m_prevWaypoint)
             startPos = m_prevWaypoint.position;
@@ -237,6 +241,23 @@ public class Coily_SM : MonoBehaviour {
                 // Going down right
                 m_direction = Direction.BR;
             }
+        }
+
+        if (m_direction == Direction.TL)
+        {
+            m_animator.SetInteger("Direction", 0);
+        }
+        else if (m_direction == Direction.TR)
+        {
+            m_animator.SetInteger("Direction", 1);
+        }
+        else if (m_direction == Direction.BL)
+        {
+            m_animator.SetInteger("Direction", 2);
+        }
+        else if (m_direction == Direction.BR)
+        {
+            m_animator.SetInteger("Direction", 3);
         }
     }
 }
